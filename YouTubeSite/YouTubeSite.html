@@ -1,0 +1,93 @@
+<!doctype html>
+<html>
+<head>
+  <title>Search</title>
+  <link rel="stylesheet" href="YouTubeSiteCSS.css">
+</head>
+<body>
+  <div id="buttons">
+    <label>
+      <input id="query" value="Search for anything" type="text" />
+      <button id="search-button" onclick="keyWordsearch()">Search</button>
+    </label>
+  </div>
+  <div id="container">
+    <h1>Search Results</h1>
+    <ul id="results"></ul>
+  </div>
+
+  <!-- Load jQuery first -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+  <!-- Define the googleApiClientReady function -->
+   <script>
+    function googleApiClientReady() {
+      gapi.load('client', function() {
+        gapi.client.init({
+          'apiKey': '***REMOVED***', // Replace with your actual API key
+          'discoveryDocs': ['https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest']
+        }).then(function() {
+          // API initialized successfully
+          // If redirected with a search query, perform the search
+          const urlParams = new URLSearchParams(window.location.search);
+          const query = urlParams.get('search');
+          if (query) {
+            $('#query').val(query);
+            keyWordsearch();
+          }
+        }, function(error) {
+          console.error('Error initializing GAPI client:', error);
+        });
+      });
+    }
+
+    function keyWordsearch() {
+      if (gapi.client && gapi.client.youtube) {
+        makeRequest();
+      } else {
+        alert('Google API client is not fully loaded. Please try again in a moment.');
+      }
+    }
+
+    function makeRequest() {
+      var q = $('#query').val();
+      gapi.client.youtube.search.list({
+        q: q,
+        part: 'snippet',
+        maxResults: 10
+      }).then(function(response) {
+        $('#results').empty();
+        var srchItems = response.result.items;
+        $.each(srchItems, function(index, item) {
+          var vidTitle = item.snippet.title;
+          var vidThumburl = item.snippet.thumbnails.medium.url;
+          var videoId = item.id.videoId;
+
+          var thumbnail = '<img class="thumb" src="' + vidThumburl + '" alt="' + vidTitle + '" data-videoid="' + videoId + '">';
+          $('#results').append('<div class="video-item"><h3>' + vidTitle + '</h3>' + thumbnail + '</div>');
+        });
+
+        // Click event to redirect to the new page with videoId
+        $('.thumb').on('click', function() {
+          var videoId = $(this).data('videoid');
+          window.location.href = 'YouTubeSitePage2.html?videoId=' + videoId;
+        });
+      }, function(reason) {
+        console.error('Error: ' + reason.result.error.message);
+      });
+    }
+
+    $(document).ready(function() {
+      // Attach keyup event listener to the input field
+      $('#query').on('keyup', function(event) {
+        if (event.key === 'Enter') {
+          keyWordsearch();
+        }
+      });
+    });
+  </script>
+
+   <!-- Load the Google API client script -->
+  <script src="https://apis.google.com/js/api.js?onload=googleApiClientReady"></script>
+</body>
+</html>

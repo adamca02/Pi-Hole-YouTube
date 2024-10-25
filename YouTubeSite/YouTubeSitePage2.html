@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+<head>
+  <title>Video Player</title>
+  <link rel="stylesheet" href="YouTubeSiteCSS.css">
+</head>
+<body>
+  <div id="buttons">
+    <label>
+      <input id="query" value="Search for anything" type="text" />
+      <button id="search-button" onclick="redirectToSearchPage()">Search</button>
+    </label>
+  </div>
+  <div id="video-container">
+    <h1>Video Player</h1>
+    <div id="player"></div>
+  </div>
+
+  <script>
+    // Get the videoId from the URL parameter
+    function getVideoIdFromUrl() {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('videoId');
+    }
+
+    // Load the YouTube video
+    document.addEventListener("DOMContentLoaded", function() {
+      const videoId = getVideoIdFromUrl();
+      if (videoId) {
+        const iframe = '<iframe width="560" height="315" src="https://www.youtube.com/embed/' + videoId + '?autoplay=1" frameborder="0" allowfullscreen></iframe>';
+        document.getElementById('player').innerHTML = iframe;
+      } else {
+        document.getElementById('player').innerHTML = '<p>No video selected.</p>';
+      }
+    });
+
+    // Redirect to the search page with query
+    function redirectToSearchPage() {
+      var query = document.getElementById('query').value;
+      if (query) {
+        // Redirect to YouTubeSite.html and pre-load search results
+        window.location.href = 'YouTubeSite.html?search=' + encodeURIComponent(query);
+      }
+    }
+
+    // Attach keyup event listener to the input field
+    document.getElementById('query').addEventListener('keyup', function(event) {
+      if (event.key === 'Enter') {
+        redirectToSearchPage();
+      }
+    });
+  </script>
+</body>
+</html>
